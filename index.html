@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lehrer Email Suche</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+        .container {
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 150px;
+            margin-top: -200px;
+        }
+        .search-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        input[type="text"] {
+            width: 300px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            width: 60%;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fff;
+        }
+        .search-icon {
+            margin-right: 10px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Bitte gebe den Nachnamen oder das Kürzel des Lehrers ein, von dem du die E-Mail-Adresse wissen willst</h1>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Nachname oder Kürzel eingeben...">
+            <button onclick="search()">
+            <span class="search-icon">🔍</span>Suche</button>
+        </div>
+        <div id="results" class="results">
+            <!-- Suchergebnisse werden hier angezeigt -->
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script>
+        const teachers = {
+  akl: {vorname: "Vera Ai Ming", nachname: "Aklan"},
+  bet: {vorname: "Namiye", nachname: "Appel"},
+  bae: {vorname: "Carsten", nachname: "Bär"},
+  bau: {vorname: "Christian", nachname: "Baumgarten"},
+  bay: {vorname: "Johanna Renate", nachname: "Bayer"},
+  bkr: {vorname: "Barbara", nachname: "Becker"},
+  bek: {vorname: "Claus", nachname: "Becker"},
+  beg: {vorname: "Alexander Dr.", nachname: "Begert"},
+  ber: {vorname: "Daniel", nachname: "Beyer"},
+  bey: {vorname: "Rolf", nachname: "Beyer"},
+  biw: {vorname: "Michael", nachname: "Biewer"},
+  bre: {vorname: "Helge", nachname: "Brendel"},
+  bus: {vorname: "Kirsten", nachname: "Busse"},
+  byr: {vorname: "Inka", nachname: "Byrknes"},
+  dah: {vorname: "Beate", nachname: "Dahmer"},
+  den: {vorname: "Dr. Fabiola", nachname: "Dengler"},
+  dil: {vorname: "Jonas", nachname: "Dillinger"},
+  dmz: {vorname: "Marina", nachname: "Domazet"},
+  dor: {vorname: "Daniel", nachname: "Dorn"},
+  ddk: {vorname: "Bent", nachname: "Duddek"},
+  dwo: {vorname: "Romina", nachname: "Dworschak"},
+  ehm: {vorname: "Marcel", nachname: "Ehmisch"},
+  fai: {vorname: "Julia", nachname: "Fain"},
+  hau: {vorname: "Manuel", nachname: "Falkenstein"},
+  fes: {vorname: "Magdalena", nachname: "Fesz-Bektas"},
+  fla: {vorname: "Verena", nachname: "Fladung"},
+  fli: {vorname: "Alexander", nachname: "Fließ"},
+  foe: {vorname: "Ursula Maria", nachname: "Föller"},
+  frk: {vorname: "Christian Friedrich", nachname: "Frank"},
+  fra: {vorname: "Dr. Kerstin Ariane", nachname: "Frank"},
+  frs: {vorname: "Marla", nachname: "Freisens"},
+  fsh: {vorname: "Florian", nachname: "Friesenhahn"},
+  fro: {vorname: "Jens-Ulrich", nachname: "Frowerk"},
+  fug: {vorname: "Sabine", nachname: "Füg"},
+  gaf: {vorname: "Manuela", nachname: "Gaffran"},
+  gsz: {vorname: "Jorge", nachname: "Gallegos Sánchez"},
+  gem: {vorname: "Sophia", nachname: "Geimer"},
+  grg: {vorname: "Irini", nachname: "Georgiadou"},
+  ger: {vorname: "Dr. Marc", nachname: "Gerhard"},
+  gol: {vorname: "Corinna", nachname: "Gollin"},
+  gop: {vorname: "Reiner", nachname: "Göpfert"},
+  gor: {vorname: "Tim", nachname: "Gorr"},
+  got: {vorname: "Marie Janina", nachname: "Gottfried"},
+  hab: {vorname: "Stephanie", nachname: "Habermehl"},
+  hgn: {vorname: "Michaela", nachname: "Hagen"},
+  haw: {vorname: "Daniela", nachname: "Hawlina-Heß"},
+  hei: {vorname: "Heide", nachname: "Heinrich"},
+  hbg: {vorname: "Roman", nachname: "Herbig"},
+  her: {vorname: "Sabrina", nachname: "Hering"},
+  hsl: {vorname: "Tanja", nachname: "Hersel"},
+  htl: {vorname: "Kristin", nachname: "Hertle-Weicht"},
+  het: {vorname: "Patricia", nachname: "Hettler"},
+  hie: {vorname: "Susanne", nachname: "Hieble"},
+  hil: {vorname: "Frank", nachname: "Hilgert"},
+  hin: {vorname: "Samantha", nachname: "Hilgner"},
+  hnr: {vorname: "Kirsten", nachname: "Hoener"},
+  jae: {vorname: "Oliver", nachname: "Jäger"},
+  jam: {vorname: "Malinka Lavinia", nachname: "Jamin"},
+  jus: {vorname: "Jens-Oliver", nachname: "Judisch"},
+  jun: {vorname: "Christina Wiltrud", nachname: "Jung"},
+  jng: {vorname: "Judith Elise", nachname: "Jung"},
+  kab: {vorname: "Holger", nachname: "Kaboth"},
+  kam: {vorname: "Ruth", nachname: "Kamin-Groß"},
+  kat: {vorname: "Anja", nachname: "Katholing"},
+  ktn: {vorname: "Vanessa Kirstin", nachname: "Kautnik"},
+  kem: {vorname: "Andrea", nachname: "Kemmerer"},
+  kls: {vorname: "Christina", nachname: "Klose"},
+  kll: {vorname: "Dr. Katja", nachname: "Knöller"},
+  kob: {vorname: "Carolin Nicola", nachname: "Kober"},
+  koe: {vorname: "Julia", nachname: "Köhler"},
+  kle: {vorname: "Heike-Maria", nachname: "Kolletzki"},
+  kon: {vorname: "Carina", nachname: "Konz"},
+  kop: {vorname: "Martin", nachname: "Koppmann"},
+  kbs: {vorname: "Leonie", nachname: "Krebs"},
+  kru: {vorname: "Anne", nachname: "Kruft"},
+  lux: {vorname: "Madeleine", nachname: "Laux"},
+  lef: {vorname: "Sebastian", nachname: "Leichtfuß"},
+  lut: {vorname: "Louisa", nachname: "Luttkus"},
+  mas: {vorname: "Bastian", nachname: "Maaß"},
+  mar: {vorname: "Jens", nachname: "Marthinsen"},
+  msk: {vorname: "Helena", nachname: "Maschinsky"},
+  mel: {vorname: "Anna-Lena", nachname: "Meller"},
+  met: {vorname: "Dominika", nachname: "Metelski-Ruhe"},
+  mly: {vorname: "Frank", nachname: "Mlynek"},
+  mor: {vorname: "Tim", nachname: "Mörler"},
+  mhn: {vorname: "Ines", nachname: "Mühlhausen"},
+  mer: {vorname: "Dominik", nachname: "Müller"},
+  mmu: {vorname: "Melanie", nachname: "Müller"},
+  mll: {vorname: "Rainer", nachname: "Müller"},
+  mul: {vorname: "Susanne", nachname: "Müller"},
+  nor: {vorname: "Karin", nachname: "Norwig"},
+  ohm: {vorname: "Verena", nachname: "Oehm"},
+  hau: {vorname: "Frank", nachname: "Oschmann"},
+  pic: {vorname: "Yvonne", nachname: "Pickmann"},
+  pit: {vorname: "Friederike", nachname: "Pitsch"},
+  pri: {vorname: "Jasmin", nachname: "Priskornik"},
+  ram: {vorname: "Fabian", nachname: "Raimann"},
+  rat: {vorname: "Marion", nachname: "Rattunde"},
+  rei: {vorname: "Sabine", nachname: "Reinke"},
+  ris: {vorname: "Sören", nachname: "Riesner"},
+  rob: {vorname: "Ulrike", nachname: "Robel"},
+  rdh: {vorname: "Pascal", nachname: "Rudolph"},
+  rhl: {vorname: "Jürgen", nachname: "Ruhl"},
+  rul: {vorname: "Christopher", nachname: "Rule"},
+  rut: {vorname: "Dr. Ulrike Irene", nachname: "Ruttmann"},
+  sdk: {vorname: "Milena", nachname: "Sakadjiyska-Rubina"},
+  sal: {vorname: "Dr. Marie-Amélie zu", nachname: "Salm-Salm"},
+  sca: {vorname: "Andreas Peter", nachname: "Schach"},
+  scz: {vorname: "Philipp", nachname: "Schefzyk"},
+  shk: {vorname: "Sandra", nachname: "Schenk"},
+  scl: {vorname: "Andreas", nachname: "Schleiermacher"},
+  slo: {vorname: "Sebastian", nachname: "Schlosser"},
+  sne: {vorname: "Anne", nachname: "Schneider"},
+  scn: {vorname: "Annette", nachname: "Schneider"},
+  slz: {vorname: "Heike", nachname: "Scholz"},
+  scr: {vorname: "Christina", nachname: "Schönherr"},
+  scf: {vorname: "Hannah", nachname: "Schuffert"},
+  str: {vorname: "Daniel", nachname: "Schuster"},
+  spf: {vorname: "Britta", nachname: "Seppelfricke"},
+  sgw: {vorname: "Marc", nachname: "Sigwart"},
+  sok: {vorname: "Anesa", nachname: "Sokolovic"},
+  spi: {vorname: "Sabrina", nachname: "Spilker"},
+  sta: {vorname: "Kerstin", nachname: "Stamm"},
+  ste: {vorname: "Melanie", nachname: "Stein"},
+  sth: {vorname: "Hildegard", nachname: "Strauch"},
+  stz: {vorname: "Alina", nachname: "Stürtz"},
+  tap: {vorname: "Dr. Diana", nachname: "Tappen-Scheuermann"},
+  tei: {vorname: "Annika", nachname: "Teichert"},
+  tha: {vorname: "Maximilian", nachname: "Thaysen"},
+  uka: {vorname: "Mateas", nachname: "Uka"},
+  hsr: {vorname: "Mandana", nachname: "Ursic-Hasiri"},
+  var: {vorname: "Ahsen", nachname: "Varol"},
+  vel: {vorname: "Anna-Lisa", nachname: "Velte"},
+  vog: {vorname: "Timo", nachname: "Vogt"},
+  war: {vorname: "Tanja", nachname: "Ward"},
+  web: {vorname: "Kim Namis", nachname: "Weber-Wiegand"},
+  wea: {vorname: "Anne Sophie", nachname: "Weis"},
+  wel: {vorname: "Megan Kathryn", nachname: "Wellens"},
+  wes: {vorname: "Roger", nachname: "Westerweller"},
+  wis: {vorname: "Vanessa", nachname: "Wiesemann"},
+  wim: {vorname: "Christiane", nachname: "Wimar"},
+  win: {vorname: "Bettina Dagmar", nachname: "Winter"},
+  wrd: {vorname: "Jonathan Philipp", nachname: "Wrede"},
+  yük: {vorname: "Abdullah", nachname: "Yüksel"},
+  zie: {vorname: "Marc", nachname: "Ziethen"},
+  zim: {vorname: "Luisa", nachname: "Zimmermann"}
+}
+
+        $(function() {
+    const teacherNames = Object.keys(teachers).map(k => ({
+        label: `${teachers[k].nachname} (${k})`,
+        value: k
+    }));
+
+    $("#search-input").autocomplete({
+        source: teacherNames,
+        select: function(event, ui) {
+            $("#search-input").val(ui.item.label);
+            search(); // Suchfunktion aufrufen, wenn ein Vorschlag ausgewählt wird
+            return false;
+        }
+    });
+
+    $("#search-input").on("keypress", function(event) {
+        if (event.which == 13) { // Wenn Enter gedrückt wird
+            event.preventDefault(); // Standard-Verhalten verhindern
+            const firstSuggestion = $("#search-input").autocomplete("widget").find("li:first").text();
+            const match = firstSuggestion.match(/\(([^)]+)\)/);
+            if (match) {
+                const selectedKey = match[1];
+                const teacher = teachers[selectedKey];
+                $("#search-input").val(`${teacher.nachname} (${selectedKey})`);
+                $("#results").html(`E-Mail-Adresse von ${teacher.vorname} ${teacher.nachname}: <a href="mailto:${teacher.vorname}.${teacher.nachname}@schule.hessen.de">${teacher.vorname}.${teacher.nachname}@schule.hessen.de</a>`);
+            }
+            // Autovervollständigung schließen
+            $("#search-input").autocomplete("close");
+        }
+    });
+});
+
+function search() {
+    const input = $("#search-input").val();
+    const result = Object.keys(teachers).find(k => `${teachers[k].nachname} (${k})` === input);
+    
+    // Wenn kein genauer Treffer gefunden wurde, wird der erste Vorschlag ausgewählt
+    if (!result) {
+        const firstSuggestion = $("#search-input").autocomplete("widget").find("li:first").text();
+        const match = firstSuggestion.match(/\(([^)]+)\)/);
+        if (match) {
+            const selectedKey = match[1];
+            const teacher = teachers[selectedKey];
+            $("#search-input").val(`${teacher.nachname} (${selectedKey})`);
+            $("#results").html(`E-Mail-Adresse von ${teacher.vorname} ${teacher.nachname}: <a href="mailto:${teacher.vorname}.${teacher.nachname}@schule.hessen.de">${teacher.vorname}.${teacher.nachname}@schule.hessen.de</a>`);
+            return;
+        }
+    }
+    
+    // Wenn ein Treffer gefunden wurde, wird die normale Anzeige verwendet
+    if (result) {
+        const teacher = teachers[result];
+        $("#results").html(`E-Mail-Adresse von ${teacher.vorname} ${teacher.nachname}: <a href="mailto:${teacher.vorname}.${teacher.nachname}@schule.hessen.de">${teacher.vorname}.${teacher.nachname}@schule.hessen.de</a>`);
+    } else {
+        $("#results").text(`Keine Ergebnisse gefunden für: ${input}`);
+    }
+}
+
+    </script>
+</body>
+</html>
